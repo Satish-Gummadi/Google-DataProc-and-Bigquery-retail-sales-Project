@@ -1,0 +1,76 @@
+satishgummadi4@cluster-7ab3-m:~$ pyspark --jars=gs://spark-lib/bigquery/spark-bigquery-with-dependencies_2.12-0.23.2.jar 
+Python 3.10.8 | packaged by conda-forge | (main, Nov 22 2022, 08:23:14) [GCC 10.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+23/10/07 05:25:57 INFO SparkEnv: Registering MapOutputTracker
+23/10/07 05:25:58 INFO SparkEnv: Registering BlockManagerMaster
+23/10/07 05:25:58 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+23/10/07 05:25:58 INFO SparkEnv: Registering OutputCommitCoordinator
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 3.3.2
+      /_/
+
+Using Python version 3.10.8 (main, Nov 22 2022 08:23:14)
+Spark context Web UI available at http://cluster-7ab3-m.us-central1-c.c.satish-practice-project.internal:40477
+Spark context available as 'sc' (master = yarn, app id = application_1696655513864_0001).
+SparkSession available as 'spark'.
+>>> from pyspark.sql import SparkSession
+>>> 
+>>> spark = SparkSession.builder.master('yarn').appName('spark-bigquery-demo').getOrCreate()
+23/10/07 05:26:24 WARN SparkSession: Using an existing Spark session; only runtime SQL configurations will take effect.
+>>> 
+>>> bucket="retailsales124"
+>>> spark.conf.set('temporaryGcsBucket', bucket)
+>>> sales= spark.read.format('bigquery').option('table', 'satish-practice-project.retail_sales_dataset.sales_table').load()
+>>> sales.createOrReplaceTempView('sales_view')
+>>> sales.show(5)
++--------------+----------+-----------+------+---+----------------+--------+--------------+------------+
+|Transaction_ID|      Date|Customer_ID|Gender|Age|Product_Category|Quantity|Price_per_Unit|Total_Amount|
++--------------+----------+-----------+------+---+----------------+--------+--------------+------------+
+|           191|2023-10-18|    CUST191|  Male| 64|          Beauty|       1|            25|          25|
+|           204|2023-09-28|    CUST204|  Male| 39|          Beauty|       1|            25|          25|
+|           230|2023-04-23|    CUST230|  Male| 54|          Beauty|       1|            25|          25|
+|           232|2023-02-06|    CUST232|Female| 43|          Beauty|       1|            25|          25|
+|           309|2023-12-23|    CUST309|Female| 26|          Beauty|       1|            25|          25|
++--------------+----------+-----------+------+---+----------------+--------+--------------+------------+
+only showing top 5 rows
+
+>>> total_sales_group1 = spark.sql('SELECT Product_Category, SUM(Total_amount) as product_sales FROM sales_view GROUP BY Product_Category;')
+>>> total_sales_group1.show()
++----------------+-------------+
+|Product_Category|product_sales|
++----------------+-------------+
+|     Electronics|       156905|
+|        Clothing|       155580|
+|          Beauty|       143515|
++----------------+-------------+
+
+>>> no_of_transact_group2 = spark.sql('SELECT Product_Category, COUNT(Transaction_ID) as transaction_count FROM sales_view GROUP BY Product_Category;')
+>>> no_of_transact_group2.show()
++----------------+-----------------+
+|Product_Category|transaction_count|
++----------------+-----------------+
+|     Electronics|              342|
+|        Clothing|              351|
+|          Beauty|              307|
++----------------+-----------------+
+
+>>> avg_transact_group3 = spark.sql('SELECT Product_Category, ROUND(AVG(Total_Amount),2) as avg_transact_value FROM sales_view GROUP BY Product_Category;')
+>>> avg_transact_group3.show()
++----------------+------------------+
+|Product_Category|avg_transact_value|
++----------------+------------------+
+|     Electronics|            458.79|
+|        Clothing|            443.25|
+|          Beauty|            467.48|
++----------------+------------------+
+
+>>> # Saving the grouped results as queries
+>>> total_sales_group1.write.format('bigquery').option('table', 'satish-practice-project.retail_sales_dataset.total_sales_group1').save()
+>>> no_of_transact_group2.write.format('bigquery').option('table', 'satish-practice-project.retail_sales_dataset.no_of_transact_group2').save()
+>>> avg_transact_group3.write.format('bigquery').option('table', 'satish-practice-project.retail_sales_dataset.avg_transact_group3').save()
+>>>                                                                             
