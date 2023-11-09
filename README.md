@@ -10,7 +10,7 @@ So we will use BigQuery to load our dataset. We can perform SQL queries to analy
 
 Steps to load and analyse our data:
 
-[I] LOADING THE DATA
+# [I] LOADING THE DATA
 -----------------------------------------------------------------------
 # open Google CLI
 
