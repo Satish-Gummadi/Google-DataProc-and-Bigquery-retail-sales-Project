@@ -1,6 +1,6 @@
 # Google-DataProc-and-Bigquery-retail-sales-Project
 
-In this project we I have worked on GCP DataProc and BigQuery to load, analyse and save the results of Retail Sales data.
+In this project I have worked on GCP DataProc and BigQuery to load, analyse and save the results of Retail Sales data.
 
 Google Dataproc is a fast, easy-to-use, fully managed cloud service for running Apache Spark and Apache Hadoop clusters in a simpler, more cost-efficient way.
 
